@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
     public lateinit var peerListListener :  WifiP2pManager.PeerListListener
 
     fun onPeersAvailable(wifiP2pDeviceList: WifiP2pDeviceList){
