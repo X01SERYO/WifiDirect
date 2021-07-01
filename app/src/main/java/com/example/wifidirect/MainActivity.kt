@@ -1,58 +1,131 @@
 package com.example.wifidirect
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
-import android.content.Context
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
 import android.net.wifi.WifiManager
+import android.net.wifi.p2p.WifiP2pDevice
+import android.net.wifi.p2p.WifiP2pDeviceList
+import android.net.wifi.p2p.WifiP2pManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Looper
 import android.view.View
 import android.widget.*
+import kotlinx.android.synthetic.main.activity_main.*
+import java.util.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
-    object Global {
-        var btnOnOff: Button? = null
-        var btnDiscover: Button? = null
-        var btnSend: Button? = null
-        var listView : ListView? = null
-        var readMsgBox : TextView?=null
-        var conectionStatus : TextView?=null
-        var writeMsg : EditText?=null
 
-        var wifiManager : WifiManager ? = null
-    }
+    private lateinit var btnOnOff: Button
+    private lateinit var btnDiscover: Button
+    private lateinit var btnSend: Button
+    private lateinit var listView: ListView
+    private lateinit var readMsgBox: TextView
+    private lateinit var conectionStatus: TextView
+    private lateinit var writeMsg: EditText
+
+    private lateinit var wifiManager: WifiManager
+
+    private lateinit var mManager: WifiP2pManager
+    private lateinit var mChannel: WifiP2pManager.Channel
+
+    private lateinit var mReceiver: BroadcastReceiver
+    private lateinit var mIntentFilter: IntentFilter
+
+    private lateinit var peers : ArrayList<WifiP2pDevice>
+    private lateinit var deviceNameArray : ArrayList<String>
+    private lateinit var deviceArray : ArrayList<WifiP2pDevice>
+
+
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initialWork()
 
-        if(Global.wifiManager?.isWifiEnabled == true){
-            Global.btnOnOff?.text = "ACTIVADO"
-        }else{
-            Global.btnOnOff?.text = "DESACTIVADO"
+        if (wifiManager.isWifiEnabled) {
+            btnOnOff.text = "ACTIVADO"
+        } else {
+            btnOnOff.text = "DESACTIVADO"
         }
     }
 
-    fun initialWork(){
-        Global.btnOnOff = findViewById(R.id.onOff)
-        Global.btnDiscover = findViewById(R.id.discover)
-        Global.btnSend = findViewById(R.id.sendButton)
-        Global.listView = findViewById(R.id.peerListView)
-        Global.readMsgBox = findViewById(R.id.readMsg)
-        Global.conectionStatus = findViewById(R.id.connectionStatus)
-        Global.writeMsg = findViewById(R.id.writeMsg)
+    public lateinit var peerListListener :  WifiP2pManager.PeerListListener
 
-        Global.wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
+    fun onPeersAvailable(wifiP2pDeviceList: WifiP2pDeviceList){
+        if(wifiP2pDeviceList != (peers)){
+            peers.clear()
+            peers.addAll(wifiP2pDeviceList.deviceList)
+
+            for(i in wifiP2pDeviceList.deviceList){
+                deviceNameArray.add(i.deviceName)
+                deviceArray.add(i)
+            }
+            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceNameArray)
+            peerListView.adapter = adapter
+
+            if(peers.size == 0){
+                connectionStatus.text=("No Device Found")
+            }
+        }
     }
 
-    fun onClick(v : View){
-        if(Global.wifiManager?.isWifiEnabled == true){
-            Global.btnOnOff?.text = "DESACTIVADO"
-            Global.wifiManager?.isWifiEnabled = false
-        }else{
-            Global.btnOnOff?.text = "ACTIVADO"
-            Global.wifiManager?.isWifiEnabled = true
+    private fun initialWork() {
+        btnOnOff = findViewById(R.id.onOff)
+        btnDiscover = findViewById(R.id.discover)
+        btnSend = findViewById(R.id.sendButton)
+        listView = findViewById(R.id.peerListView)
+        readMsgBox = findViewById(R.id.readMsg)
+        conectionStatus = findViewById(R.id.connectionStatus)
+        writeMsg = findViewById(R.id.writeMsg)
+
+        //
+        wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
+        //
+
+        mManager = getSystemService(WIFI_P2P_SERVICE) as WifiP2pManager
+        mChannel = mManager.initialize(this, Looper.getMainLooper(), null) as WifiP2pManager.Channel
+
+        mReceiver = WiFiDirectBroadcastReceiver(mManager, mChannel, this)
+
+        mIntentFilter = IntentFilter()
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        registerReceiver(mReceiver, mIntentFilter)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(mReceiver)
+    }
+
+    fun onClickActivarWiFi(v: View) {
+        if (wifiManager.isWifiEnabled) {
+            btnOnOff.text = ("DESACTIVADO")
+            wifiManager.isWifiEnabled = false
+        } else {
+            btnOnOff.text = ("ACTIVADO")
+            wifiManager.isWifiEnabled = true
         }
+    }
+
+    fun onClickDiscover(v: View) {
+        mManager.discoverPeers(mChannel, object : WifiP2pManager.ActionListener {
+            override fun onSuccess() {
+                connectionStatus.text = ("Discovery Started")
+            }
+
+            override fun onFailure(reason: Int) {
+                connectionStatus.text = ("Discovery not Started")
+            }
+        })
     }
 }
