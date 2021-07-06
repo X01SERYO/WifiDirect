@@ -10,6 +10,7 @@ import android.net.wifi.p2p.WifiP2pManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_main.*
@@ -53,9 +54,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun cargarArreglo(deviceNameArray:ArrayList<String>, deviceArray:ArrayList<WifiP2pDevice>){
+        Log.v("Sergio","Hola")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceNameArray)
+        peerListView.adapter = adapter
+    }
 
 
-    public lateinit var peerListListener :  WifiP2pManager.PeerListListener
+    /*public lateinit var peerListListener :  WifiP2pManager.PeerListListener
 
     fun onPeersAvailable(wifiP2pDeviceList: WifiP2pDeviceList){
         if(wifiP2pDeviceList != (peers)){
@@ -66,14 +72,13 @@ class MainActivity : AppCompatActivity() {
                 deviceNameArray.add(i.deviceName)
                 deviceArray.add(i)
             }
-            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceNameArray)
-            peerListView.adapter = adapter
+
 
             if(peers.size == 0){
                 connectionStatus.text=("No Device Found")
             }
         }
-    }
+    }*/
 
     private fun initialWork() {
         btnOnOff = findViewById(R.id.onOff)
