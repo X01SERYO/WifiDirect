@@ -11,6 +11,7 @@ import android.net.wifi.p2p.WifiP2pDeviceList
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.Build
 import android.os.Parcelable
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import java.util.*
@@ -43,7 +44,7 @@ class WiFiDirectBroadcastReceiver(
                 //OBTIENE
                 val list: WifiP2pDeviceList? =
                     intent.getParcelableExtra(WifiP2pManager.EXTRA_P2P_DEVICE_LIST)
-
+                Log.v("Sergio","$mChannel")
                 for (dispositivo in list!!.deviceList) { //...
 
                     if (!deviceNameArray.contains(dispositivo.deviceName)) {
@@ -56,23 +57,7 @@ class WiFiDirectBroadcastReceiver(
 
             }
             WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION == action -> {
-                val connectivityManager =
-                    context!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    val nw = connectivityManager.activeNetwork
-                    val actNw = connectivityManager.getNetworkCapabilities(nw)
-                    when {
-                        actNw!!.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                        actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                        //for other device how are able to connect with Ethernet
-                        actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                        //for check internet over Bluetooth
-                        actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH) -> true
-                        else -> false
-                    }
-                } else {
-                    connectivityManager.activeNetworkInfo?.isConnected ?: false
-                }
+
             }
         }
     }

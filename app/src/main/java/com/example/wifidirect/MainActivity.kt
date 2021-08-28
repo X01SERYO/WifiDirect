@@ -14,6 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.Exception
 import java.util.*
+import android.os.Build
+
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,7 +46,6 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initialWork()
@@ -52,46 +55,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             btnOnOff.text = "DESACTIVADO"
         }
-
-        peerListView.setOnItemClickListener { parent, view, position, id ->
-            Log.v("Sergio","${deviceArray[position]}")
-            val device=deviceArray[position]
-            val config = WifiP2pConfig()
-            config.deviceAddress=device.deviceAddress
-            mManager.connect(mChannel,config, object : WifiP2pManager.ActionListener{
-                override fun onSuccess() {
-                    Toast.makeText(applicationContext,"Conectado a ${device.deviceName}",Toast.LENGTH_SHORT).show()
-                }
-
-                override fun onFailure(reason: Int) {
-                    Toast.makeText(applicationContext,"No Conectado ",Toast.LENGTH_SHORT).show()
-                }
-
-            })
-
-        }
     }
-
-     object connectionInfoListener: WifiP2pManager.ConnectionInfoListener {
-
-        override fun onConnectionInfoAvailable(info: WifiP2pInfo?) {
-
-            val groupOwnerAddres = info!!.groupOwnerAddress
-            if (info.groupFormed && info.isGroupOwner){
-                //this.conectionStatus
-            }
-        }
-    }
-
-
-
-    /*object peerListListener: WifiP2pManager.PeerListListener {
-        override fun onPeersAvailable(peers: WifiP2pDeviceList?) {
-            TODO("Not yet implemented")
-        }
-
-    }*/
-
     fun cargarArreglo(deviceNameArray:ArrayList<String>, deviceArray:ArrayList<WifiP2pDevice>){
         Log.v("Sergio","Hola $deviceArray")
         this.deviceArray = deviceArray
@@ -121,6 +85,7 @@ class MainActivity : AppCompatActivity() {
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
+        Log.v("Sergio","mIntentFilter $mIntentFilter")
     }
 
     override fun onResume() {
