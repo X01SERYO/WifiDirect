@@ -15,7 +15,6 @@
         android:onClick="onClickActivarWiFi"
         android:text="Wifi On"
         app:layout_constraintBottom_toTopOf="@+id/peerListView"
-        app:layout_constraintEnd_toStartOf="@+id/discover"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -30,7 +29,6 @@
         android:text="discover"
         app:layout_constraintBottom_toTopOf="@+id/peerListView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ListView

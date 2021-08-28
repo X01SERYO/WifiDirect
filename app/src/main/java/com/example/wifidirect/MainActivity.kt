@@ -4,17 +4,16 @@ import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.net.wifi.WifiManager
-import android.net.wifi.p2p.WifiP2pDevice
-import android.net.wifi.p2p.WifiP2pDeviceList
-import android.net.wifi.p2p.WifiP2pManager
-import androidx.appcompat.app.AppCompatActivity
+import android.net.wifi.p2p.*
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.ArrayList
+import java.lang.Exception
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var deviceArray : ArrayList<WifiP2pDevice>
 
 
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -52,33 +52,52 @@ class MainActivity : AppCompatActivity() {
         } else {
             btnOnOff.text = "DESACTIVADO"
         }
+
+        peerListView.setOnItemClickListener { parent, view, position, id ->
+            Log.v("Sergio","${deviceArray[position]}")
+            val device=deviceArray[position]
+            val config = WifiP2pConfig()
+            config.deviceAddress=device.deviceAddress
+            mManager.connect(mChannel,config, object : WifiP2pManager.ActionListener{
+                override fun onSuccess() {
+                    Toast.makeText(applicationContext,"Conectado a ${device.deviceName}",Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onFailure(reason: Int) {
+                    Toast.makeText(applicationContext,"No Conectado ",Toast.LENGTH_SHORT).show()
+                }
+
+            })
+
+        }
     }
 
+     object connectionInfoListener: WifiP2pManager.ConnectionInfoListener {
+
+        override fun onConnectionInfoAvailable(info: WifiP2pInfo?) {
+
+            val groupOwnerAddres = info!!.groupOwnerAddress
+            if (info.groupFormed && info.isGroupOwner){
+                //this.conectionStatus
+            }
+        }
+    }
+
+
+
+    /*object peerListListener: WifiP2pManager.PeerListListener {
+        override fun onPeersAvailable(peers: WifiP2pDeviceList?) {
+            TODO("Not yet implemented")
+        }
+
+    }*/
+
     fun cargarArreglo(deviceNameArray:ArrayList<String>, deviceArray:ArrayList<WifiP2pDevice>){
-        Log.v("Sergio","Hola")
+        Log.v("Sergio","Hola $deviceArray")
+        this.deviceArray = deviceArray
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceNameArray)
         peerListView.adapter = adapter
     }
-
-
-    /*public lateinit var peerListListener :  WifiP2pManager.PeerListListener
-
-    fun onPeersAvailable(wifiP2pDeviceList: WifiP2pDeviceList){
-        if(wifiP2pDeviceList != (peers)){
-            peers.clear()
-            peers.addAll(wifiP2pDeviceList.deviceList)
-
-            for(i in wifiP2pDeviceList.deviceList){
-                deviceNameArray.add(i.deviceName)
-                deviceArray.add(i)
-            }
-
-
-            if(peers.size == 0){
-                connectionStatus.text=("No Device Found")
-            }
-        }
-    }*/
 
     private fun initialWork() {
         btnOnOff = findViewById(R.id.onOff)
@@ -125,6 +144,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onClickDiscover(v: View) {
+
         mManager.discoverPeers(mChannel, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
                 connectionStatus.text = ("Discovery Started")
