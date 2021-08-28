@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         Log.v("Sergio","Hola $deviceArray")
         this.deviceArray = deviceArray
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceNameArray)
-        peerListView.adapter = adapter
+        listView.adapter = adapter
     }
 
     private fun initialWork() {
