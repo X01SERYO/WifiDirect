@@ -1,8 +1,10 @@
 package com.example.wifidirect
 
-import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.IntentFilter
+import android.net.nsd.NsdManager
+import android.net.nsd.NsdServiceInfo
 import android.net.wifi.WifiManager
 import android.net.wifi.p2p.*
 import android.os.Bundle
@@ -12,11 +14,10 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import java.lang.Exception
 import java.util.*
-import android.os.Build
-
-
+import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,19 +44,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var deviceArray : ArrayList<WifiP2pDevice>
 
 
-
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initialWork()
 
         if (wifiManager.isWifiEnabled) {
-            btnOnOff.text = "ACTIVADO"
+            btnOnOff.text = ("ACTIVADO")
         } else {
-            btnOnOff.text = "DESACTIVADO"
+            btnOnOff.text = ("DESACTIVADO")
         }
     }
+
+
     fun cargarArreglo(deviceNameArray:ArrayList<String>, deviceArray:ArrayList<WifiP2pDevice>){
         Log.v("Sergio","Hola $deviceArray")
         this.deviceArray = deviceArray

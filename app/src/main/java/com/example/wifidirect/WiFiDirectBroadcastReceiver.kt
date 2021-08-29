@@ -1,14 +1,17 @@
 package com.example.wifidirect
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
+import android.content.SharedPreferences.Editor
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkInfo
-import android.net.wifi.p2p.WifiP2pDevice
-import android.net.wifi.p2p.WifiP2pDeviceList
-import android.net.wifi.p2p.WifiP2pManager
+import android.net.wifi.p2p.*
+import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Parcelable
 import android.util.Log
@@ -23,9 +26,12 @@ class WiFiDirectBroadcastReceiver(
     private var mActivity: MainActivity
 ) : BroadcastReceiver() {
 
+    private var preferences: SharedPreferences? = null
+    private var editor: Editor? = null
     private var deviceNameArray = ArrayList<String>()
     private var deviceArray = ArrayList<WifiP2pDevice>()
 
+    @SuppressLint("CommitPrefEdits")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action
@@ -44,7 +50,6 @@ class WiFiDirectBroadcastReceiver(
                 //OBTIENE
                 val list: WifiP2pDeviceList? =
                     intent.getParcelableExtra(WifiP2pManager.EXTRA_P2P_DEVICE_LIST)
-                Log.v("Sergio","$mChannel")
                 for (dispositivo in list!!.deviceList) { //...
 
                     if (!deviceNameArray.contains(dispositivo.deviceName)) {
